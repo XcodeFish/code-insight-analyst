@@ -1,37 +1,78 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import { PermissionPrompt } from './prompt/permission-prompt';
 import { DependencyCommand } from './commands/dependency-command';
+import { ErrorHandler } from '../utils/error-handler';
 
 /**
- * 创建CLI程序
+ * CLI应用类
  */
-function createProgram(): void {
-  const program = new Command();
+export class CliApp {
+  private program: Command;
+  private errorHandler: ErrorHandler;
+  private permissionPrompt: PermissionPrompt;
 
-  program.name('code-insight').description('代码洞察分析工具').version('1.0.0');
+  /**
+   * 构造函数
+   */
+  constructor() {
+    this.program = new Command();
+    this.errorHandler = ErrorHandler.getInstance();
+    this.permissionPrompt = new PermissionPrompt();
 
-  // 注册依赖分析命令
-  const dependencyCommand = new DependencyCommand();
-  program.addCommand(dependencyCommand.getCommand());
+    this.setupProgram();
+  }
 
-  // 添加帮助信息
-  program.addHelpText(
-    'after',
-    `
+  /**
+   * 配置命令行程序
+   */
+  private setupProgram(): void {
+    this.program
+      .name('code-insight')
+      .description('Code Insight Analyst - 代码分析工具')
+      .version('0.1.0');
+
+    // 注册命令
+    this.registerCommands();
+
+    // 添加帮助信息
+    this.program.addHelpText(
+      'after',
+      `
 示例:
   $ code-insight dependency                  # 分析当前项目的依赖关系
-  $ code-insight dep ./my-project            # 分析指定项目的依赖关系
-  $ code-insight dep ./my-project -f html -o ./reports    # 生成HTML格式报告并保存到指定目录
+  $ code-insight dep -p ./my-project         # 分析指定项目的依赖关系
+  $ code-insight dep -f html -o ./reports    # 生成HTML格式报告并保存到指定目录
   `
-  );
+    );
 
-  // 解析参数
-  program.parse(process.argv);
+    // 错误处理
+    this.program.exitOverride();
+  }
 
-  // 如果没有提供命令，显示帮助
-  if (!process.argv.slice(2).length) {
-    program.outputHelp();
+  /**
+   * 注册命令
+   */
+  private registerCommands(): void {
+    // 注册依赖分析命令
+    const dependencyCommand = new DependencyCommand();
+    this.program.addCommand(dependencyCommand.getCommand());
+
+    // 这里可以继续添加其他命令
+    // ...
+  }
+
+  /**
+   * 运行CLI程序
+   */
+  async run(): Promise<void> {
+    try {
+      await this.program.parseAsync(process.argv);
+    } catch (error) {
+      this.errorHandler.error(error instanceof Error ? error : String(error));
+      process.exit(1);
+    }
   }
 }
 
@@ -40,7 +81,8 @@ function createProgram(): void {
  */
 function main(): void {
   try {
-    createProgram();
+    const app = new CliApp();
+    app.run();
   } catch (error) {
     console.error(`错误: ${(error as Error).message}`);
     process.exit(1);

@@ -50,6 +50,8 @@ export class PermissionManager {
 
   /**
    * 请求访问权限
+   * 注意：这个方法本身不再实现交互逻辑，而是由专门的交互模块调用
+   * @param path 文件路径
    * @returns 是否已获得授权
    */
   async requestAccess(path: string): Promise<boolean> {
@@ -58,9 +60,8 @@ export class PermissionManager {
       return true;
     }
 
-    // 这里可以添加更详细的权限请求流程
-    // 如显示将要访问的文件数量，类型等
-
+    // 实际的权限交互已经移到了PermissionPrompt类中
+    // 这里只返回未授权状态，让调用者决定如何处理
     return false;
   }
 
