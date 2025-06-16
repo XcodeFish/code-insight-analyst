@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= title %>
+  </title>
+  <!-- Chart.js 导入 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --dark-color: #2c3e50;
+      --light-color: #ecf0f1;
+      --border-color: #ddd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      padding-bottom: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .header {
+      background-color: var(--dark-color);
+      color: white;
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .header p {
+      opacity: 0.8;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-card.primary {
+      border-top: 3px solid var(--primary-color);
+    }
+
+    .stat-card.success {
+      border-top: 3px solid var(--secondary-color);
+    }
+
+    .stat-card.warning {
+      border-top: 3px solid var(--warning-color);
+    }
+
+    .stat-card.danger {
+      border-top: 3px solid var(--danger-color);
+    }
+
+    .stat-card h3 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      color: #777;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--dark-color);
+    }
+
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      justify-content: space-between;
+    }
+
+    .chart-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      margin-bottom: 2rem;
+      flex: 1;
+      min-width: 350px;
+    }
+
+    .chart-header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .chart-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .chart-canvas {
+      height: 250px;
+    }
+
+    .section {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .section-header {
+      background-color: var(--dark-color);
+      color: white;
+      padding: 1rem;
+      font-weight: 600;
+    }
+
+    .section-content {
+      padding: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      background-color: #f1f1f1;
+      padding: 0.75rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .badge-warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .path-container {
+      background-color: #f8f9fa;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+    }
+
+    .line-highlight {
+      background-color: #fff3cd;
+      padding: 0.25rem;
+      border-radius: 2px;
+      margin-right: 0.25rem;
+      font-size: 0.85rem;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .incremental-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #f1f8ff;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .trend-positive {
+      color: #28a745;
+    }
+
+    .trend-negative {
+      color: #dc3545;
+    }
+
+    .trend-neutral {
+      color: #6c757d;
+    }
+
+    @media (max-width: 768px) {
+      .summary-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-container {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="container">
+      <h1>
+        <%= title %>
+      </h1>
+      <p><strong>项目:</strong>
+        <%= projectName %>
+      </p>
+      <p><strong>生成时间:</strong>
+        <%= timestamp %>
+      </p>
+      <p><strong>分析耗时:</strong>
+        <%= duration %>
+      </p>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 摘要统计 -->
+    <div class="summary-stats">
+      <div class="stat-card primary">
+        <h3>总文件数</h3>
+        <div class="value">
+          <%= results.stats.totalFiles %>
+        </div>
+      </div>
+      <div class="stat-card success">
+        <h3>总代码行数</h3>
+        <div class="value">
+          <%= results.stats.totalLines.toLocaleString() %>
+        </div>
+      </div>
+
+      <% // 计算问题总数 let unusedCount=0; if (results.unusedCode) { unusedCount=results.unusedCode.unusedImports.length +
+        results.unusedCode.unusedVariables.length + results.unusedCode.unusedFunctions.length +
+        results.unusedCode.unusedClasses.length + results.unusedCode.unusedExports.length; } const
+        duplicatesCount=results.duplicates ? results.duplicates.duplicates.length : 0; const
+        circularCount=results.dependencies ? results.dependencies.circularDependencies.length : 0; const
+        memoryLeaksCount=results.memoryLeaks ? results.memoryLeaks.potentialLeaks.length : 0; const
+        infiniteLoopsCount=results.infiniteLoops ? results.infiniteLoops.potentialInfiniteLoops.length : 0; const
+        totalIssues=unusedCount + duplicatesCount + circularCount + memoryLeaksCount + infiniteLoopsCount; %>
+
+        <div class="stat-card warning">
+          <h3>发现问题</h3>
+          <div class="value">
+            <%= totalIssues %>
+          </div>
+        </div>
+
+        <% if (results.coverage && results.coverage.length> 0) {
+          // 计算平均覆盖率
+          let avgLineCoverage = 0;
+          results.coverage.forEach(file => {
+          avgLineCoverage += file.lineCoverage;
+          });
+          avgLineCoverage /= results.coverage.length;
+          %>
+          <div
+            class="stat-card <%= avgLineCoverage < 0.7 ? 'danger' : (avgLineCoverage < 0.8 ? 'warning' : 'success') %>">
+            <h3>平均代码覆盖率</h3>
+            <div class="value">
+              <%= (avgLineCoverage * 100).toFixed(1) %>%
+            </div>
+          </div>
+          <% } %>
+    </div>
+
+    <!-- 图表区域 -->
+    <% if (typeof chartsHtml !=='undefined' && chartsHtml) { %>
+      <%- chartsHtml %>
+        <% } %>
+
+          <!-- 增量分析信息 -->
+          <% if (results.incrementalInfo && results.incrementalInfo.trends) { %>
+            <div class="section">
+              <div class="section-header">增量分析结果</div>
+              <div class="section-content">
+                <% if (results.incrementalInfo.baseCommit && results.incrementalInfo.currentCommit) { %>
+                  <p><strong>基准版本:</strong>
+                    <%= results.incrementalInfo.baseCommit %>
+                  </p>
+                  <p><strong>当前版本:</strong>
+                    <%= results.incrementalInfo.currentCommit %>
+                  </p>
+                  <% } %>
+
+                    <p><strong>变更文件数:</strong>
+                      <%= results.incrementalInfo.changedFiles.length %>
+                    </p>
+
+                    <% if (results.incrementalInfo.changedFiles.length> 0) { %>
+                      <details>
+                        <summary>变更文件列表</summary>
+                        <div style="margin-top: 1rem;">
+                          <% results.incrementalInfo.changedFiles.forEach(file=> { %>
+                            <div class="path-container">
+                              <%= file %>
+                            </div>
+                            <% }); %>
+                        </div>
+                      </details>
+                      <% } %>
+
+                        <% const trends=results.incrementalInfo.trends; %>
+                          <% if (trends) { %>
+                            <h3 style="margin: 1.5rem 0 1rem 0;">变化趋势</h3>
+                            <table>
+                              <tr>
+                                <th>指标</th>
+                                <th>变化</th>
+                              </tr>
+                              <% if (trends.coverageTrend !==undefined) { %>
+                                <tr>
+                                  <td>代码覆盖率</td>
+                                  <td
+                                    class="<%= trends.coverageTrend > 0 ? 'trend-positive' : (trends.coverageTrend < 0 ? 'trend-negative' : 'trend-neutral') %>">
+                                    <%= trends.coverageTrend> 0 ? '+' : '' %><%= (trends.coverageTrend * 100).toFixed(2)
+                                        %>%
+                                  </td>
+                                </tr>
+                                <% } %>
+
+                                  <% if (trends.duplicationTrend !==undefined) { %>
+                                    <tr>
+                                      <td>重复代码</td>
+                                      <td
+                                        class="<%= trends.duplicationTrend < 0 ? 'trend-positive' : (trends.duplicationTrend > 0 ? 'trend-negative' : 'trend-neutral') %>">
+                                        <%= trends.duplicationTrend> 0 ? '+' : '' %><%= (trends.duplicationTrend *
+                                            100).toFixed(2) %>%
+                                      </td>
+                                    </tr>
+                                    <% } %>
+
+                                      <% if (trends.unusedCodeTrend !==undefined) { %>
+                                        <tr>
+                                          <td>未使用代码</td>
+                                          <td
+                                            class="<%= trends.unusedCodeTrend < 0 ? 'trend-positive' : (trends.unusedCodeTrend > 0 ? 'trend-negative' : 'trend-neutral') %>">
+                                            <%= trends.unusedCodeTrend> 0 ? '+' : '' %><%= (trends.unusedCodeTrend *
+                                                100).toFixed(2) %>%
+                                          </td>
+                                        </tr>
+                                        <% } %>
+
+                                          <% if (trends.circularDependenciesTrend !==undefined) { %>
+                                            <tr>
+                                              <td>循环依赖</td>
+                                              <td
+                                                class="<%= trends.circularDependenciesTrend < 0 ? 'trend-positive' : (trends.circularDependenciesTrend > 0 ? 'trend-negative' : 'trend-neutral') %>">
+                                                <%= trends.circularDependenciesTrend> 0 ? '+' : '' %><%=
+                                                    (trends.circularDependenciesTrend * 100).toFixed(2) %>%
+                                              </td>
+                                            </tr>
+                                            <% } %>
+                            </table>
+                            <% } %>
+              </div>
+            </div>
+            <% } %>
+
+              <!-- 代码覆盖率详情 -->
+              <% if (results.coverage && results.coverage.length> 0 && detailed) { %>
+                <div class="section">
+                  <div class="section-header">代码覆盖率详情</div>
+                  <div class="section-content">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>文件</th>
+                          <th>行覆盖率</th>
+                          <th>语句覆盖率</th>
+                          <th>分支覆盖率</th>
+                          <th>函数覆盖率</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% results.coverage.forEach(file=> { %>
+                          <tr>
+                            <td>
+                              <div class="path-container">
+                                <%= file.filePath %>
+                              </div>
+                            </td>
+                            <td>
+                              <%= (file.lineCoverage * 100).toFixed(2) %>%
+                            </td>
+                            <td>
+                              <%= (file.statementCoverage * 100).toFixed(2) %>%
+                            </td>
+                            <td>
+                              <%= (file.branchCoverage * 100).toFixed(2) %>%
+                            </td>
+                            <td>
+                              <%= (file.functionCoverage * 100).toFixed(2) %>%
+                            </td>
+                          </tr>
+                          <% }); %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <% } %>
+
+                  <!-- 重复代码详情 -->
+                  <% if (results.duplicates && results.duplicates.duplicates.length> 0 && detailed) { %>
+                    <div class="section">
+                      <div class="section-header">重复代码详情</div>
+                      <div class="section-content">
+                        <p class="mb-3">
+                          <strong>总重复率:</strong>
+                          <%= (results.duplicates.totalDuplicationRate * 100).toFixed(2) %>%
+                        </p>
+
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>文件数</th>
+                              <th>行数</th>
+                              <th>相似度</th>
+                              <th>位置</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% results.duplicates.duplicates.forEach(dupe=> { %>
+                              <tr>
+                                <td>
+                                  <%= dupe.locations.length %>
+                                </td>
+                                <td>
+                                  <%= dupe.lines %>
+                                </td>
+                                <td>
+                                  <%= (dupe.similarity * 100).toFixed(0) %>%
+                                </td>
+                                <td>
+                                  <% dupe.locations.forEach(loc=> { %>
+                                    <div class="path-container">
+                                      <%= loc.filePath %>
+                                        <% if (loc.startLine) { %>
+                                          <span class="line-highlight">行 <%= loc.startLine %>
+                                              <%= loc.endLine ? `-${loc.endLine}` : '' %></span>
+                                          <% } %>
+                                    </div>
+                                    <% }); %>
+                                </td>
+                              </tr>
+                              <% }); %>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <% } %>
+
+                      <!-- 未使用代码详情 -->
+                      <% if (results.unusedCode && detailed) { %>
+                        <div class="section">
+                          <div class="section-header">未使用代码详情</div>
+                          <div class="section-content">
+                            <% const hasUnusedImports=results.unusedCode.unusedImports &&
+                              results.unusedCode.unusedImports.length> 0;
+                              const hasUnusedVariables = results.unusedCode.unusedVariables &&
+                              results.unusedCode.unusedVariables.length > 0;
+                              const hasUnusedFunctions = results.unusedCode.unusedFunctions &&
+                              results.unusedCode.unusedFunctions.length > 0;
+                              const hasUnusedClasses = results.unusedCode.unusedClasses &&
+                              results.unusedCode.unusedClasses.length > 0;
+                              const hasUnusedExports = results.unusedCode.unusedExports &&
+                              results.unusedCode.unusedExports.length > 0;
+                              %>
+
+                              <% if (hasUnusedImports) { %>
+                                <h3 style="margin-bottom: 1rem;">未使用导入 (<%= results.unusedCode.unusedImports.length %>)
+                                </h3>
+                                <div style="margin-bottom: 1.5rem;">
+                                  <% results.unusedCode.unusedImports.forEach(location=> { %>
+                                    <div class="path-container">
+                                      <%= location.filePath %>
+                                        <% if (location.startLine) { %>
+                                          <span class="line-highlight">行 <%= location.startLine %></span>
+                                          <% } %>
+                                    </div>
+                                    <% }); %>
+                                </div>
+                                <% } %>
+
+                                  <% if (hasUnusedVariables) { %>
+                                    <h3 style="margin-bottom: 1rem;">未使用变量 (<%=
+                                        results.unusedCode.unusedVariables.length %>)</h3>
+                                    <div style="margin-bottom: 1.5rem;">
+                                      <% results.unusedCode.unusedVariables.forEach(location=> { %>
+                                        <div class="path-container">
+                                          <%= location.filePath %>
+                                            <% if (location.startLine) { %>
+                                              <span class="line-highlight">行 <%= location.startLine %></span>
+                                              <% } %>
+                                        </div>
+                                        <% }); %>
+                                    </div>
+                                    <% } %>
+
+                                      <% if (hasUnusedFunctions) { %>
+                                        <h3 style="margin-bottom: 1rem;">未使用函数 (<%=
+                                            results.unusedCode.unusedFunctions.length %>)</h3>
+                                        <div style="margin-bottom: 1.5rem;">
+                                          <% results.unusedCode.unusedFunctions.forEach(location=> { %>
+                                            <div class="path-container">
+                                              <%= location.filePath %>
+                                                <% if (location.startLine) { %>
+                                                  <span class="line-highlight">行 <%= location.startLine %></span>
+                                                  <% } %>
+                                            </div>
+                                            <% }); %>
+                                        </div>
+                                        <% } %>
+
+                                          <% if (hasUnusedClasses) { %>
+                                            <h3 style="margin-bottom: 1rem;">未使用类 (<%=
+                                                results.unusedCode.unusedClasses.length %>)</h3>
+                                            <div style="margin-bottom: 1.5rem;">
+                                              <% results.unusedCode.unusedClasses.forEach(location=> { %>
+                                                <div class="path-container">
+                                                  <%= location.filePath %>
+                                                    <% if (location.startLine) { %>
+                                                      <span class="line-highlight">行 <%= location.startLine %></span>
+                                                      <% } %>
+                                                </div>
+                                                <% }); %>
+                                            </div>
+                                            <% } %>
+
+                                              <% if (hasUnusedExports) { %>
+                                                <h3 style="margin-bottom: 1rem;">未使用导出 (<%=
+                                                    results.unusedCode.unusedExports.length %>)</h3>
+                                                <div>
+                                                  <% results.unusedCode.unusedExports.forEach(location=> { %>
+                                                    <div class="path-container">
+                                                      <%= location.filePath %>
+                                                        <% if (location.startLine) { %>
+                                                          <span class="line-highlight">行 <%= location.startLine %>
+                                                          </span>
+                                                          <% } %>
+                                                    </div>
+                                                    <% }); %>
+                                                </div>
+                                                <% } %>
+                          </div>
+                        </div>
+                        <% } %>
+
+                          <!-- 循环依赖详情 -->
+                          <% if (results.dependencies && results.dependencies.circularDependencies &&
+                            results.dependencies.circularDependencies.length> 0 && detailed) { %>
+                            <div class="section">
+                              <div class="section-header">循环依赖详情</div>
+                              <div class="section-content">
+                                <table>
+                                  <thead>
+                                    <tr>
+                                      <th>#</th>
+                                      <th>依赖环</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <% results.dependencies.circularDependencies.forEach((cycle, index)=> { %>
+                                      <tr>
+                                        <td>
+                                          <%= index + 1 %>
+                                        </td>
+                                        <td>
+                                          <div class="path-container">
+                                            <%= cycle.join(' → ') %> → <%= cycle[0] %>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+    
+    <!-- 风险检测结果 (内存泄漏和死循环) -->
+    <% if ((results.memoryLeaks && results.memoryLeaks.potentialLeaks.length > 0) || 
+           (results.infiniteLoops && results.infiniteLoops.potentialInfiniteLoops.length > 0) && detailed) { %>
+      <div class="section">
+        <div class="section-header">代码风险检测</div>
+        <div class="section-content">
+          
+          <% if (results.memoryLeaks && results.memoryLeaks.potentialLeaks.length > 0) { %>
+            <h3 style="margin-bottom: 1rem;">内存泄漏风险 (<%= results.memoryLeaks.potentialLeaks.length %>)</h3>
+            <table style="margin-bottom: 2rem;">
+              <thead>
+                <tr>
+                  <th>位置</th>
+                  <th>风险级别</th>
+                  <th>类型</th>
+                  <th>描述</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% results.memoryLeaks.potentialLeaks.forEach(leak => { %>
+                  <tr>
+                    <td>
+                      <div class="path-container">
+                        <%= leak.location.filePath %>
+                        <% if (leak.location.startLine) { %>
+                          <span class="line-highlight">行 <%= leak.location.startLine %></span>
+                        <% } %>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= leak.riskLevel === ' high' ? 'danger' : (leak.riskLevel==='medium'
+                                              ? 'warning' : 'success' ) %>">
+                                              <%= leak.riskLevel==='high' ? '高' : (leak.riskLevel==='medium' ? '中' : '低'
+                                                ) %>
+                                                </span>
+                                        </td>
+                                        <td>
+                                          <%= leak.type %>
+                                        </td>
+                                        <td>
+                                          <%= leak.description %>
+                                        </td>
+                                      </tr>
+                                      <% }); %>
+                                  </tbody>
+                                </table>
+                                <% } %>
+
+                                  <% if (results.infiniteLoops && results.infiniteLoops.potentialInfiniteLoops.length>
+                                    0)
+                                    { %>
+                                    <h3 style="margin-bottom: 1rem;">潜在死循环风险 (<%=
+                                        results.infiniteLoops.potentialInfiniteLoops.length %>)</h3>
+                                    <table>
+                                      <thead>
+                                        <tr>
+                                          <th>位置</th>
+                                          <th>风险级别</th>
+                                          <th>原因</th>
+                                          <th>建议</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% results.infiniteLoops.potentialInfiniteLoops.forEach(loop=> { %>
+                                          <tr>
+                                            <td>
+                                              <div class="path-container">
+                                                <%= loop.location.filePath %>
+                                                  <% if (loop.location.startLine) { %>
+                                                    <span class="line-highlight">行 <%= loop.location.startLine %></span>
+                                                    <% } %>
+                                              </div>
+                                            </td>
+                                            <td>
+                                              <span
+                                                class="badge badge-<%= loop.riskLevel === 'high' ? 'danger' : (loop.riskLevel === 'medium' ? 'warning' : 'success') %>">
+                                                <%= loop.riskLevel==='high' ? '高' : (loop.riskLevel==='medium' ? '中'
+                                                  : '低' ) %>
+                                              </span>
+                                            </td>
+                                            <td>
+                                              <%= loop.reason %>
+                                            </td>
+                                            <td>
+                                              <%= loop.suggestion || '无' %>
+                                            </td>
+                                          </tr>
+                                          <% }); %>
+                                      </tbody>
+                                    </table>
+                                    <% } %>
+
+                              </div>
+                            </div>
+                            <% } %>
+  </div>
+
+  <footer class="footer">
+    <p>由 Code Insight Analyst 生成 | <%= timestamp %>
+    </p>
+  </footer>
+
+  <!-- 图表渲染脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function ()
+    {
+      // 注册数据标签插件
+      Chart.register(ChartDataLabels)
+
+      // 解析图表数据
+      // @ts-nocheck
+      const chartData = <% - chartData || '[]' %>
+
+        // 为每个图表创建配置
+        chartData.forEach((chart, index) =>
+        {
+          const canvas = document.getElementById(`chart-${index}`)
+          if (!canvas) return
+
+          const ctx = canvas.getContext('2d')
+
+          const config = {
+            type: chart.type,
+            data: {
+              labels: chart.labels,
+              datasets: chart.datasets
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                title: {
+                  display: true,
+                  text: chart.title,
+                  font: {
+                    size: 16,
+                    weight: 'bold',
+                  }
+                },
+                datalabels: {
+                  color: function (context)
+                  {
+                    return (chart.type === 'pie' || chart.type === 'doughnut') ? '#fff' : '#333'
+                  },
+                  font: {
+                    weight: 'bold'
+                  },
+                  formatter: (value) =>
+                  {
+                    // 饼图和环形图显示百分比
+                    if (chart.type === 'pie' || chart.type === 'doughnut') {
+                      const sum = chart.datasets[0].data.reduce((a, b) => a + b, 0)
+                      const percentage = ((value / sum) * 100).toFixed(1)
+                      return `${percentage}%`
+                    }
+                    // 柱状图显示具体数值
+                    return chart.type === 'bar' ? value.toFixed(1) : null
+                  },
+                  anchor: 'end',
+                  align: 'end',
+                },
+                legend: {
+                  display: chart.type !== 'bar' || chart.datasets.length > 1,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  enabled: true,
+                }
+              }
+            }
+          }
+
+          // 特定图表类型的配置调整
+          if (chart.type === 'bar') {
+            config.options.scales = {
+              y: {
+                beginAtZero: true
+              }
+            }
+          } else if (chart.type === 'doughnut') {
+            config.options.cutout = '50%'
+          }
+
+          // 创建图表
+          new Chart(ctx, config)
+        })
+    });
+  </script>
+</body>
+
+</html>

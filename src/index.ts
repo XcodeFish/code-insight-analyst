@@ -4,11 +4,21 @@
  */
 
 // 导出分析器
-export * from './core/engine.js';
-export * from './core/processor.js';
+export * from './core/engine';
+export * from './core/processor';
+
+// 导出报告相关
+export * from './report';
+export * from './report/visualizers/chart-visualizer';
+
+// 导出增量分析
+export * from './core/incremental';
+
+// 导出自定义规则引擎
+export * from './core/rules';
 
 // 导出CLI
-export * from './cli/index.js';
+export * from './cli/index';
 
 // 版本信息
 export const version = '0.1.0';

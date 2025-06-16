@@ -52,6 +52,7 @@
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.3",
     "commander": "^11.0.0",
+    "console-table-printer": "^2.14.3",
     "inquirer": "^8.2.5",
     "listr2": "^6.6.0",
     "nyc": "^15.1.0",
