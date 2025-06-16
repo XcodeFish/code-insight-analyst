@@ -17,6 +17,7 @@ export interface IConfig {
     interval: number;
     patterns?: string[];
     exclude?: string[];
+    analyzers?: string[];
   };
 }
 
@@ -27,10 +28,11 @@ export class ConfigManager {
   private configPath: string;
   private config: IConfig;
   private logger: Logger;
+  private configDir: string;
 
   constructor() {
-    const configDir = path.join(os.homedir(), '.code-insight');
-    this.configPath = path.join(configDir, 'config.json');
+    this.configDir = path.join(os.homedir(), '.code-insight');
+    this.configPath = path.join(this.configDir, 'config.json');
     this.logger = new Logger();
     this.config = {};
 
@@ -43,8 +45,7 @@ export class ConfigManager {
   private init(): void {
     try {
       // 确保配置目录存在
-      const configDir = path.dirname(this.configPath);
-      fs.ensureDirSync(configDir);
+      fs.ensureDirSync(this.configDir);
 
       // 加载配置
       if (fs.existsSync(this.configPath)) {
@@ -67,6 +68,7 @@ export class ConfigManager {
               '**/build/**',
               '**/.git/**',
             ],
+            analyzers: [],
           },
         };
         this.saveConfig();
@@ -145,8 +147,113 @@ export class ConfigManager {
           '**/build/**',
           '**/.git/**',
         ],
+        analyzers: [],
       },
     };
     this.saveConfig();
+  }
+
+  /**
+   * 更新监测模式配置
+   * @param watchConfig 监测模式配置
+   */
+  updateWatchConfig(watchConfig: Partial<IConfig['watchMode']> = {}): void {
+    if (!this.config.watchMode) {
+      this.config.watchMode = {
+        enabled: false,
+        interval: 5000,
+        patterns: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+        exclude: [
+          '**/node_modules/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/.git/**',
+        ],
+        analyzers: [],
+      };
+    }
+
+    this.config.watchMode = {
+      enabled:
+        typeof watchConfig.enabled === 'boolean'
+          ? watchConfig.enabled
+          : this.config.watchMode.enabled,
+      interval:
+        typeof watchConfig.interval === 'number'
+          ? watchConfig.interval
+          : this.config.watchMode.interval,
+      patterns: watchConfig.patterns || this.config.watchMode.patterns,
+      exclude: watchConfig.exclude || this.config.watchMode.exclude,
+      analyzers: watchConfig.analyzers || this.config.watchMode.analyzers,
+    };
+
+    this.saveConfig();
+  }
+
+  /**
+   * 启用监测模式
+   */
+  enableWatchMode(): void {
+    if (this.config.watchMode) {
+      this.config.watchMode.enabled = true;
+      this.saveConfig();
+    }
+  }
+
+  /**
+   * 禁用监测模式
+   */
+  disableWatchMode(): void {
+    if (this.config.watchMode) {
+      this.config.watchMode.enabled = false;
+      this.saveConfig();
+    }
+  }
+
+  /**
+   * 获取插件配置
+   * @param pluginName 插件名称
+   */
+  getPluginConfig<T = any>(pluginName: string): T {
+    const plugins = this.config.plugins || {};
+    return (plugins[pluginName] || {}) as T;
+  }
+
+  /**
+   * 设置插件配置
+   * @param pluginName 插件名称
+   * @param config 插件配置
+   */
+  setPluginConfig(pluginName: string, config: any): void {
+    if (!this.config.plugins) {
+      this.config.plugins = {};
+    }
+    this.config.plugins[pluginName] = config;
+    this.saveConfig();
+  }
+
+  /**
+   * 删除插件配置
+   * @param pluginName 插件名称
+   */
+  removePluginConfig(pluginName: string): void {
+    if (this.config.plugins && this.config.plugins[pluginName]) {
+      delete this.config.plugins[pluginName];
+      this.saveConfig();
+    }
+  }
+
+  /**
+   * 获取配置文件路径
+   */
+  getConfigPath(): string {
+    return this.configPath;
+  }
+
+  /**
+   * 获取配置目录
+   */
+  getConfigDir(): string {
+    return this.configDir;
   }
 }

@@ -12,9 +12,9 @@
     "build": "tsup",
     "lint": "eslint src --max-warnings=150",
     "format": "prettier --write .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "jest --config=jest.config.cjs",
+    "test:watch": "jest --watch --config=jest.config.cjs",
+    "test:coverage": "jest --coverage --config=jest.config.cjs"
   },
   "keywords": [
     "code-analysis",

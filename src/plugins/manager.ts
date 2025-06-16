@@ -1,10 +1,20 @@
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { Logger } from '../utils/logger';
 import { ConfigManager } from '../utils/config-manager';
 import { PluginLoader } from './loader';
-import { IPlugin, PluginContext, PluginResult, PluginHookName } from './types';
+import {
+  IPlugin,
+  PluginContext,
+  PluginResult,
+  PluginHookName,
+  PluginTools,
+} from './types';
+
+const execAsync = promisify(exec);
 
 /**
  * 插件管理器类
@@ -122,6 +132,42 @@ export class PluginManager {
   }
 
   /**
+   * 执行特定插件
+   * @param pluginName 插件名称
+   * @param context 插件上下文
+   */
+  public async executePlugin(
+    pluginName: string,
+    context: PluginContext
+  ): Promise<PluginResult | null> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const plugin = this.getPlugin(pluginName);
+    if (!plugin) {
+      this.logger.warn(`插件不存在: ${pluginName}`);
+      return null;
+    }
+
+    try {
+      this.logger.debug(`执行插件: ${plugin.name}`);
+      const result = await plugin.execute(context);
+      return {
+        ...result,
+        pluginName: plugin.name,
+      };
+    } catch (error) {
+      this.logger.error(`插件 ${plugin.name} 执行失败:`, error);
+      return {
+        success: false,
+        pluginName: plugin.name,
+        error: `执行失败: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
+  }
+
+  /**
    * 调用特定插件钩子
    * @param hookName 钩子名称
    * @param data 钩子数据
@@ -147,12 +193,94 @@ export class PluginManager {
     try {
       this.logger.info(`正在安装插件: ${pluginPath}`);
 
-      // TODO: 实现插件安装逻辑
-      // 如果是本地路径，复制到用户插件目录
-      // 如果是npm包名，使用npm安装
+      // 确保用户插件目录存在
+      await fs.ensureDir(this.userPluginsDir);
+
+      let pluginInstallPath = '';
+
+      // 判断是本地路径还是npm包名
+      if (
+        fs.existsSync(pluginPath) &&
+        (await fs.stat(pluginPath)).isDirectory()
+      ) {
+        // 本地路径，复制到用户插件目录
+        const pluginName = path.basename(pluginPath);
+        pluginInstallPath = path.join(this.userPluginsDir, pluginName);
+
+        // 检查是否已存在同名插件
+        if (fs.existsSync(pluginInstallPath)) {
+          this.logger.warn(`已存在同名插件: ${pluginName}`);
+          return false;
+        }
+
+        // 复制插件目录
+        await fs.copy(pluginPath, pluginInstallPath);
+        this.logger.info(`插件复制完成: ${pluginName}`);
+      } else {
+        // npm包名，使用npm安装
+        try {
+          const tempDir = path.join(os.tmpdir(), 'code-insight-plugins');
+          await fs.ensureDir(tempDir);
+
+          // 在临时目录安装npm包
+          this.logger.debug(`在临时目录安装npm包: ${tempDir}`);
+          const { stdout } = await execAsync(
+            `cd "${tempDir}" && npm install ${pluginPath}`
+          );
+          this.logger.debug(`npm安装输出: ${stdout}`);
+
+          // 查找安装的包
+          const nodeModulesDir = path.join(tempDir, 'node_modules');
+          const packagePath = path.join(nodeModulesDir, pluginPath);
+
+          if (!fs.existsSync(packagePath)) {
+            throw new Error(`找不到安装的包: ${pluginPath}`);
+          }
+
+          // 复制到插件目录
+          const pluginName = path.basename(pluginPath);
+          pluginInstallPath = path.join(this.userPluginsDir, pluginName);
+
+          // 检查是否已存在同名插件
+          if (fs.existsSync(pluginInstallPath)) {
+            this.logger.warn(`已存在同名插件: ${pluginName}`);
+            return false;
+          }
+
+          await fs.copy(packagePath, pluginInstallPath);
+          this.logger.info(`npm包安装完成: ${pluginName}`);
+
+          // 清理临时目录
+          await fs.remove(tempDir);
+        } catch (npmError) {
+          throw new Error(
+            `npm安装失败: ${npmError instanceof Error ? npmError.message : String(npmError)}`
+          );
+        }
+      }
 
       // 安装后重新加载插件
       await this.pluginLoader.loadFromDirectory(this.userPluginsDir);
+
+      // 通知插件安装事件
+      const installedPlugin = this.getPlugin(path.basename(pluginPath));
+      if (installedPlugin) {
+        const context: PluginContext = {
+          projectPath: process.cwd(),
+          config: this.configManager.getConfig(),
+          tools: this.createPluginTools(),
+          analysisResults: {},
+        };
+        await this.invokeHook(
+          PluginHookName.PLUGIN_INSTALLED,
+          {
+            pluginName: installedPlugin.name,
+            pluginVersion: installedPlugin.version,
+            pluginPath: pluginInstallPath,
+          },
+          context
+        );
+      }
 
       return true;
     } catch (error) {
@@ -175,15 +303,45 @@ export class PluginManager {
         return false;
       }
 
+      // 先保存一些插件信息，供卸载后通知
+      const pluginInfo = {
+        name: plugin.name,
+        version: plugin.version,
+      };
+
       // 先清理插件资源
       if (plugin.cleanup) {
         await plugin.cleanup();
       }
 
-      // TODO: 删除插件目录
+      // 查找插件目录
+      const pluginDir = path.join(this.userPluginsDir, pluginName);
+      if (fs.existsSync(pluginDir)) {
+        // 删除插件目录
+        await fs.remove(pluginDir);
+        this.logger.info(`已删除插件目录: ${pluginDir}`);
+      } else {
+        this.logger.warn(`未找到插件目录: ${pluginDir}`);
+      }
 
       // 重新加载插件
       await this.pluginLoader.reload();
+
+      // 通知插件卸载事件
+      const context: PluginContext = {
+        projectPath: process.cwd(),
+        config: this.configManager.getConfig(),
+        tools: this.createPluginTools(),
+        analysisResults: {},
+      };
+      await this.invokeHook(
+        PluginHookName.PLUGIN_UNINSTALLED,
+        {
+          pluginName: pluginInfo.name,
+          pluginVersion: pluginInfo.version,
+        },
+        context
+      );
 
       return true;
     } catch (error) {
@@ -215,5 +373,64 @@ export class PluginManager {
       (this.configManager.get('plugins') as Record<string, any>) || {};
     plugins[pluginName] = config;
     this.configManager.set('plugins', plugins);
+
+    // 通知配置更改事件
+    const context: PluginContext = {
+      projectPath: process.cwd(),
+      config: this.configManager.getConfig(),
+      tools: this.createPluginTools(),
+      analysisResults: {},
+    };
+    this.invokeHook(
+      PluginHookName.CONFIG_CHANGE,
+      {
+        pluginName,
+        newConfig: config,
+      },
+      context
+    ).catch((error) => {
+      this.logger.error(`通知配置更改事件失败:`, error);
+    });
+  }
+
+  /**
+   * 创建插件工具
+   */
+  private createPluginTools(): PluginTools {
+    return {
+      logger: {
+        info: (message: string) => this.logger.info(message),
+        warn: (message: string) => this.logger.warn(message),
+        error: (message: string) => this.logger.error(message),
+        debug: (message: string) => this.logger.debug(message),
+      },
+      fs: {
+        readFile: async (filePath: string): Promise<string> => {
+          return fs.readFile(filePath, 'utf8');
+        },
+        writeFile: async (filePath: string, content: string): Promise<void> => {
+          return fs.writeFile(filePath, content);
+        },
+        exists: async (filePath: string): Promise<boolean> => {
+          return fs.pathExists(filePath);
+        },
+        listFiles: async (/* pattern: string | string[] */): Promise<
+          string[]
+        > => {
+          // 这里应该实现文件列表功能，但为简化，返回空数组
+          return [];
+        },
+      },
+      parser: {
+        parseTypeScript: (/* code: string */): Record<string, unknown> => {
+          // 这里应该实现TypeScript解析功能
+          return {};
+        },
+        parseJavaScript: (/* code: string */): Record<string, unknown> => {
+          // 这里应该实现JavaScript解析功能
+          return {};
+        },
+      },
+    };
   }
 }

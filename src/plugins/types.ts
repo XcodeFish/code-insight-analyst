@@ -125,6 +125,76 @@ export interface PluginResult {
    * 错误信息（如果有）
    */
   error?: string;
+
+  /**
+   * 结果摘要
+   */
+  summary?: string;
+
+  /**
+   * 问题列表
+   */
+  issues?: Array<{
+    /**
+     * 问题级别
+     */
+    level: 'info' | 'warning' | 'error';
+
+    /**
+     * 问题消息
+     */
+    message: string;
+
+    /**
+     * 相关文件
+     */
+    file?: string;
+
+    /**
+     * 行号
+     */
+    line?: number;
+
+    /**
+     * 列号
+     */
+    column?: number;
+
+    /**
+     * 代码片段
+     */
+    snippet?: string;
+
+    /**
+     * 修复建议
+     */
+    suggestion?: string;
+  }>;
+
+  /**
+   * 性能指标
+   */
+  performance?: {
+    /**
+     * 开始时间戳
+     */
+    startTime: number;
+
+    /**
+     * 结束时间戳
+     */
+    endTime: number;
+
+    /**
+     * 处理的文件数
+     */
+    filesProcessed?: number;
+
+    /**
+     * 内存使用量 (MB)
+     */
+    memoryUsage?: number;
+  };
 }
 
 /**
@@ -180,6 +250,13 @@ export enum PluginHookName {
   WATCH_MODE_START = 'watchModeStart',
   WATCH_MODE_FILE_CHANGED = 'watchModeFileChanged',
   WATCH_MODE_END = 'watchModeEnd',
+  CONFIG_CHANGE = 'configChange',
+  BEFORE_INCREMENTAL_ANALYSIS = 'beforeIncrementalAnalysis',
+  AFTER_INCREMENTAL_ANALYSIS = 'afterIncrementalAnalysis',
+  PLUGIN_INSTALLED = 'pluginInstalled',
+  PLUGIN_UNINSTALLED = 'pluginUninstalled',
+  BEFORE_DEPENDENCY_ANALYSIS = 'beforeDependencyAnalysis',
+  AFTER_DEPENDENCY_ANALYSIS = 'afterDependencyAnalysis',
 }
 
 /**

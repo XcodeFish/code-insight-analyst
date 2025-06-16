@@ -8,7 +8,6 @@ const config = {
       'ts-jest',
       {
         tsconfig: 'tsconfig.json',
-        useESM: true,
       },
     ],
   },
@@ -21,13 +20,11 @@ const config = {
   globals: {
     'ts-jest': {
       isolatedModules: true,
-      useESM: true,
     },
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  extensionsToTreatAsEsm: ['.ts'],
 };
 
-export default config;
+module.exports = config;
