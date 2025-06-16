@@ -1,10 +1,7 @@
 #!/usr/bin/env node
-
-import { default as cli } from '../dist/cli/index.js';
-
 try {
-  cli();
-} catch (err) {
-  console.error('启动失败:', err);
+  require('../dist/cli/index.js');
+} catch (error) {
+  console.error('执行失败:', error);
   process.exit(1);
 }

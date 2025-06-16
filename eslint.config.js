@@ -16,6 +16,9 @@ export default [
     ignores: ['dist/**', 'node_modules/**', '*.js', '*.mjs', '.git/**'],
   },
   {
+    files: ['**/*.ts', '**/*.tsx'],
+  },
+  {
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',

@@ -4,11 +4,12 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/cli/index.ts'],
   format: ['cjs', 'esm'],
   dts: true,
-  splitting: false,
   sourcemap: true,
   clean: true,
-  shims: true,
+  target: 'es2018',
+  onSuccess: 'node scripts/generate-bin.js',
+  treeshake: true,
   banner: {
-    js: `#!/usr/bin/env node`,
+    js: '#!/usr/bin/env node',
   },
-}); 
+});

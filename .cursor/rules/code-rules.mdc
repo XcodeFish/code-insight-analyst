@@ -1,0 +1,73 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 代码规范
+开发的代码要求简洁明了，优雅，不冗余
+遵循开发原则
+# 开发规范
+
+## 代码风格
+
+采用严格的TypeScript配置和ESLint规则：
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true
+  }
+}
+```
+
+```json
+// .eslintrc.json
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/no-explicit-any": "error"
+  }
+}
+```
+
+## 命名规范
+
+- **文件命名**: 小写，连字符分隔 (如 `code-analyzer.ts`)
+- **类命名**: PascalCase (如 `CodeAnalyzer`)
+- **变量/函数**: camelCase (如 `analyzeCode`)
+- **常量**: UPPER_SNAKE_CASE (如 `MAX_FILE_SIZE`)
+- **接口**: 以I前缀 (如 `IAnalyzer`)
+- **类型**: 以T前缀 (如 `TResult`)
+
+## 文档规范
+
+- 所有公共API必须包含JSDoc注释
+- README文件保持更新
+- 关键算法需要添加设计说明
+- 维护CHANGELOG.md记录版本变更
+
+```typescript
+/**
+ * 分析代码中的重复方法
+ * @param ast 解析后的AST
+ * @returns 重复方法的映射，键为方法签名，值为方法信息数组
+ */
+detectMethods(ast: AST): Map<string, MethodInfo[]> {
+  // 实现...
+}
+```
