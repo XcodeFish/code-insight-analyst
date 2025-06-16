@@ -13,6 +13,7 @@ import { HtmlReporter } from '../reporters/html-reporter';
 import { ErrorHandler, ErrorLevel } from '../utils/error-handler';
 import { tryCatch } from '../utils/try-catch-wrapper';
 import { withProgress } from '../utils/with-progress';
+import { DependencyCommand } from './commands/dependency-command';
 
 // 创建命令行程序
 const program = new Command();
@@ -25,6 +26,10 @@ program
   .name('code-insight')
   .description('Code Insight Analyst - 代码分析工具')
   .version('0.1.0');
+
+// 注册依赖分析命令
+const dependencyCommand = new DependencyCommand();
+program.addCommand(dependencyCommand.getCommand());
 
 // 重复代码检测命令
 program
@@ -179,6 +184,17 @@ program
       ErrorLevel.ERROR
     );
   });
+
+// 添加帮助信息
+program.addHelpText(
+  'after',
+  `
+示例:
+  $ code-insight dependency                  # 分析当前项目的依赖关系
+  $ code-insight dep -p ./my-project         # 分析指定项目的依赖关系
+  $ code-insight dep -f html -o ./reports    # 生成HTML格式报告并保存到指定目录
+  `
+);
 
 // 错误处理
 program.exitOverride();

@@ -24,25 +24,56 @@ alwaysApply: true
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true
-  }
+    "declaration": true,
+    "outDir": "dist",
+    //"rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "bin/**/*.js", "tsup.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
+
 ```
 
 ```json
 // .eslintrc.json
 {
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
+  "env": {
+    "node": true,
+    "es2020": true
+  },
   "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
-    "@typescript-eslint/explicit-function-return-type": "warn",
-    "@typescript-eslint/no-explicit-any": "error"
-  }
+    "no-console": ["warn", { "allow": ["info", "warn", "error", "log"] }],
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "ignorePatterns": ["dist", "node_modules", "*.js"],
+  "overrides": [
+    {
+      "files": ["src/cli/**/*.ts", "src/utils/logger.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/utils/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
 }
+
 ```
 
 ## 命名规范
