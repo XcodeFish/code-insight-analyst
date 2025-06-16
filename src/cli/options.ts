@@ -7,6 +7,7 @@ export interface IAnalysisOption {
   value: string;
   estimatedTime?: number; // 预计耗时(分钟)
   description?: string;
+  isExperimental?: boolean;
 }
 
 export const ANALYSIS_OPTIONS: IAnalysisOption[] = [
@@ -39,11 +40,19 @@ export const ANALYSIS_OPTIONS: IAnalysisOption[] = [
     value: 'memory-leak',
     estimatedTime: 3,
     description: '检测潜在的内存泄漏问题（实验性功能）',
+    isExperimental: true,
   },
   {
     name: '死循环风险检测 [实验] (预计耗时: ~2分钟)',
     value: 'infinite-loop',
     estimatedTime: 2,
     description: '识别可能导致死循环的代码模式（实验性功能）',
+    isExperimental: true,
+  },
+  {
+    name: '示例增量分析器 [监测模式] (预计耗时: ~1分钟)',
+    value: 'example-incremental',
+    estimatedTime: 1,
+    description: '演示增量分析功能的示例分析器，适合监测模式',
   },
 ];

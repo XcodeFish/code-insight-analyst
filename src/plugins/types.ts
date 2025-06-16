@@ -112,6 +112,11 @@ export interface PluginResult {
   success: boolean;
 
   /**
+   * 插件名称
+   */
+  pluginName?: string;
+
+  /**
    * 结果数据
    */
   data?: any;
@@ -172,6 +177,9 @@ export enum PluginHookName {
   AFTER_FILE_ANALYSIS = 'afterFileAnalysis',
   BEFORE_REPORT_GENERATION = 'beforeReportGeneration',
   AFTER_REPORT_GENERATION = 'afterReportGeneration',
+  WATCH_MODE_START = 'watchModeStart',
+  WATCH_MODE_FILE_CHANGED = 'watchModeFileChanged',
+  WATCH_MODE_END = 'watchModeEnd',
 }
 
 /**

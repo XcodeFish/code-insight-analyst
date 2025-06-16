@@ -1,0 +1,8 @@
+{
+  "name": "code-metrics-plugin",
+  "version": "1.0.0",
+  "description": "代码度量插件 - 提供代码复杂度和健康度报告",
+  "main": "index.js",
+  "author": "Your Name",
+  "license": "MIT"
+}

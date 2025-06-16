@@ -11,6 +11,13 @@ export interface IConfig {
   lastUsedOptions?: string[];
   preferredMode?: string;
   analyzers?: Record<string, unknown>;
+  plugins?: Record<string, any>;
+  watchMode?: {
+    enabled: boolean;
+    interval: number;
+    patterns?: string[];
+    exclude?: string[];
+  };
 }
 
 /**
@@ -49,6 +56,18 @@ export class ConfigManager {
           lastUsedOptions: [],
           preferredMode: 'single',
           analyzers: {},
+          plugins: {},
+          watchMode: {
+            enabled: false,
+            interval: 5000, // 5秒
+            patterns: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+            exclude: [
+              '**/node_modules/**',
+              '**/dist/**',
+              '**/build/**',
+              '**/.git/**',
+            ],
+          },
         };
         this.saveConfig();
       }
@@ -115,6 +134,18 @@ export class ConfigManager {
       lastUsedOptions: [],
       preferredMode: 'single',
       analyzers: {},
+      plugins: {},
+      watchMode: {
+        enabled: false,
+        interval: 5000,
+        patterns: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+        exclude: [
+          '**/node_modules/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/.git/**',
+        ],
+      },
     };
     this.saveConfig();
   }

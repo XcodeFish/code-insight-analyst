@@ -52,12 +52,45 @@ export class PluginLoader {
   }
 
   /**
+   * 从指定目录加载插件
+   * @param directory 插件目录路径
+   */
+  public async loadFromDirectory(directory: string): Promise<void> {
+    // 临时保存原始目录
+    const originalDir = this.pluginsDir;
+    // 设置当前目录为需要加载的目录
+    this.pluginsDir = directory;
+
+    // 加载插件
+    await this.loadPlugins();
+
+    // 还原原始目录
+    this.pluginsDir = originalDir;
+  }
+
+  /**
+   * 重新加载所有插件
+   */
+  public async reload(): Promise<void> {
+    // 先清理所有已加载的插件
+    await this.cleanup();
+
+    // 重新加载插件
+    await this.loadPlugins();
+  }
+
+  /**
    * 加载所有插件
    */
   private async loadPlugins(): Promise<void> {
+    if (!fs.existsSync(this.pluginsDir)) {
+      return;
+    }
+
     // 获取所有插件目录
     const dirs = fs.readdirSync(this.pluginsDir).filter((dir) => {
-      return fs.statSync(path.join(this.pluginsDir, dir)).isDirectory();
+      const fullPath = path.join(this.pluginsDir, dir);
+      return fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory();
     });
 
     for (const dir of dirs) {
@@ -88,6 +121,12 @@ export class PluginLoader {
           console.warn(
             `插件 ${dir} 的入口文件 ${metadata.main} 不存在，已跳过`
           );
+          continue;
+        }
+
+        // 如果插件已经加载，跳过
+        if (this.plugins.has(metadata.name)) {
+          console.debug(`插件 ${metadata.name} 已经加载，跳过`);
           continue;
         }
 
@@ -176,6 +215,22 @@ export class PluginLoader {
     }
 
     return result;
+  }
+
+  /**
+   * 调用特定钩子
+   *
+   * @param hookName - 钩子名称
+   * @param data - 钩子数据
+   * @param context - 插件上下文
+   * @returns 处理后的数据
+   */
+  public async invokeHook<T>(
+    hookName: PluginHookName,
+    data: T,
+    context: PluginContext
+  ): Promise<T> {
+    return this.applyHooks(hookName, data, context);
   }
 
   /**
