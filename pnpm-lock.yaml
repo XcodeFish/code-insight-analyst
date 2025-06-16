@@ -39,6 +39,9 @@ importers:
       '@types/commander':
         specifier: ^2.12.2
         version: 2.12.5
+      '@types/ejs':
+        specifier: ^3.1.5
+        version: 3.1.5
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -57,6 +60,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.1.0
         version: 6.21.0(eslint@8.57.1)(typescript@5.8.3)
+      ejs:
+        specifier: ^3.1.10
+        version: 3.1.10
       eslint:
         specifier: ^8.45.0
         version: 8.57.1
@@ -720,6 +726,9 @@ packages:
   '@types/commander@2.12.5':
     resolution: {integrity: sha512-YXGZ/rz+s57VbzcvEV9fUoXeJlBt5HaKu5iUheiIWNsJs23bz6AnRuRiZBRVBLYyPnixNvVnuzM5pSaxr8Yp/g==}
     deprecated: This is a stub types definition. commander provides its own type definitions, so you do not need this installed.
+
+  '@types/ejs@3.1.5':
+    resolution: {integrity: sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==}
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
@@ -3255,6 +3264,8 @@ snapshots:
   '@types/commander@2.12.5':
     dependencies:
       commander: 11.1.0
+
+  '@types/ejs@3.1.5': {}
 
   '@types/estree@1.0.7': {}
 

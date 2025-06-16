@@ -10,12 +10,12 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
-    "rootDir": "src",
+    //"rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "bin/**/*.js"],
+  "include": ["src/**/*.ts", "bin/**/*.js", "tsup.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

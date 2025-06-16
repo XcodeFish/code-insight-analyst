@@ -216,12 +216,10 @@ export class CoverageAnalyzer {
         }
       );
 
-      let stdoutData = '';
       let stderrData = '';
 
       nycProcess.stdout.on('data', (data) => {
         const message = data.toString();
-        stdoutData += message;
         if (progressCallback) {
           progressCallback(message.trim());
         }

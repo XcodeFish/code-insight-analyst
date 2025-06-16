@@ -2,6 +2,7 @@
   "name": "code-insight-analyst",
   "version": "0.1.0",
   "description": "高性能、多功能的代码分析工具",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "code-insight": "bin/code-insight.js"
@@ -25,12 +26,14 @@
   "devDependencies": {
     "@eslint/js": "^9.29.0",
     "@types/commander": "^2.12.2",
+    "@types/ejs": "^3.1.5",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.3",
     "@types/jest": "^29.5.3",
     "@types/node": "^20.4.2",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
+    "ejs": "^3.1.10",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "fs-extra": "^11.1.1",

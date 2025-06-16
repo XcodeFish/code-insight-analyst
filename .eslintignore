@@ -1,0 +1,11 @@
+# 配置文件
+tsup.config.ts
+scripts/
+bin/
+
+# 构建输出
+dist/
+node_modules/
+
+# 其他工具文件
+*.config.js 

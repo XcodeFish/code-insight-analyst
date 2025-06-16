@@ -11,9 +11,23 @@
     "es2020": true
   },
   "rules": {
-    "no-console": "warn",
+    "no-console": ["warn", { "allow": ["info", "warn", "error", "log"] }],
     "@typescript-eslint/explicit-module-boundary-types": "warn",
     "@typescript-eslint/no-explicit-any": "warn"
   },
-  "ignorePatterns": ["dist", "node_modules", "*.js"]
-} 
+  "ignorePatterns": ["dist", "node_modules", "*.js"],
+  "overrides": [
+    {
+      "files": ["src/cli/**/*.ts", "src/utils/logger.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/utils/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+}
