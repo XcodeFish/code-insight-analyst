@@ -1,0 +1,75 @@
+{
+  "name": "code-insight-analyst",
+  "version": "0.1.0",
+  "description": "代码分析工具，用于检测代码质量、覆盖率、重复、未使用代码和潜在问题",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "code-insight": "bin/code-insight.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "docs": "typedoc",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "code-analysis",
+    "static-analysis",
+    "typescript",
+    "code-quality",
+    "duplicates",
+    "coverage",
+    "memory-leak"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.8.0",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.29.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "globals": "^16.2.0",
+    "husky": "^9.1.7",
+    "jest": "^30.0.0",
+    "madge": "^8.0.0",
+    "memwatch-next": "^0.3.0",
+    "nyc": "^17.1.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.4.0",
+    "ts-morph": "^26.0.0",
+    "tsup": "^8.5.0",
+    "typedoc": "^0.28.5",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.0"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "chart.js": "^4.5.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.0",
+    "ejs": "^3.1.10",
+    "graceful-fs": "^4.2.11",
+    "inquirer": "^12.6.3",
+    "keytar": "^7.9.0",
+    "listr2": "^8.3.3",
+    "lru-cache": "^11.1.0",
+    "puppeteer": "^24.10.0"
+  }
+}
