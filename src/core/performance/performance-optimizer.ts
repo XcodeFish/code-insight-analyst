@@ -219,18 +219,15 @@ export class PerformanceOptimizer {
    * 增量分析，只处理有变化的文件
    * @param files 文件列表
    * @param processFn 处理函数
-   * @param getHash 获取文件哈希值的函数
    * @returns 处理结果
    */
   async incrementalProcess<T>(
     files: string[],
-    processFn: (file: string) => Promise<T>,
-    getHash: (file: string) => string = this.getFileHash
+    processFn: (file: string) => Promise<T>
   ): Promise<Record<string, T>> {
     const results: Record<string, T> = {};
 
     for (const file of files) {
-      const hash = getHash(file);
       const cacheKey = `incremental:${path.basename(file)}`;
 
       results[file] = await this.withCache(cacheKey, () => processFn(file), {

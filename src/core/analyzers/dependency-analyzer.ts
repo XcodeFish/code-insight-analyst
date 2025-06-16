@@ -7,8 +7,7 @@ import {
   DependencyAnalysisResult,
 } from '../../types/dependency-types';
 // 注：使用前需安装 madge 依赖
-// 使用 import type 避免直接依赖问题
-import type { MadgeInstance } from 'madge';
+// 使用 require 动态引入 madge，便于处理可能的依赖缺失
 
 // 使用 require 动态引入 madge，便于处理可能的依赖缺失
 const madge = async (

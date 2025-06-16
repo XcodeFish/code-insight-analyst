@@ -133,7 +133,12 @@ export class ReportGenerator {
 
     // 根据数据类型生成适合的表格或文本
     // 这是一个基础实现，子类可以针对特定数据类型覆盖此方法
-    return JSON.stringify(data, null, 2);
+
+    // 根据选项决定显示格式
+    const detailed = options.detailed || false;
+    const indent = detailed ? 2 : 1;
+
+    return JSON.stringify(data, null, indent);
   }
 
   /**
@@ -248,6 +253,7 @@ ${this.dataToMarkdown(data, options)}
   /**
    * 将数据转换为HTML格式
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected dataToHtml(data: ReportData, _options: ReportOptions): string {
     // 默认实现，子类应覆盖此方法以提供特定数据类型的HTML表示
     if (!data) return '<p>无数据</p>';
@@ -262,6 +268,7 @@ ${this.dataToMarkdown(data, options)}
   /**
    * 将数据转换为Markdown格式
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected dataToMarkdown(data: ReportData, _options: ReportOptions): string {
     // 默认实现，子类应覆盖此方法以提供特定数据类型的Markdown表示
     if (!data) return '无数据';

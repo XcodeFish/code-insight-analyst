@@ -318,7 +318,6 @@ export class ConfigManager {
     try {
       if (ext === '.js') {
         // 动态导入JS配置文件
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         return require(filePath);
       } else {
         // 读取JSON配置文件

@@ -23,5 +23,7 @@ export default {
     'subject-full-stop': [2, 'never', '.'],
     'subject-case': [0],
     'header-max-length': [2, 'always', 72],
+    'body-max-line-length': [0, 'always'],
+    'footer-max-line-length': [0, 'always'],
   },
 };

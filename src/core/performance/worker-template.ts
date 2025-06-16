@@ -100,7 +100,6 @@ export abstract class WorkerTemplate implements IWorkerTaskProcessor {
  * @param data 传入的数据
  * @returns 处理结果
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function processData<T, R>(data: T): Promise<R> {
   // 以下是示例实现，应该根据具体需求替换
   // 目前只是简单返回输入数据
