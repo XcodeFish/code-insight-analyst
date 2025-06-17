@@ -16,6 +16,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "bin/**/*.js", "tsup.config.ts"],
+  "include": ["src/**/*.ts", "bin/**/*.js", "tsup.config.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

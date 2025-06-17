@@ -6,6 +6,9 @@
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
+  "parserOptions": {
+    "project": ["./tsconfig.json", "./tsconfig.test.json"]
+  },
   "env": {
     "node": true,
     "es2020": true
@@ -27,6 +30,16 @@
       "files": ["src/utils/**/*.ts"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["test/**/*.ts"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off"
       }
     }
   ]

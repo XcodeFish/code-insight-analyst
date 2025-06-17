@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* global jest, describe, it, expect, beforeEach, afterEach */
 import { ConfigManager } from '../../../src/utils/config-manager';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
 jest.mock('fs-extra');
+jest.mock('path');
 jest.mock('os');
 
 describe('ConfigManager', () => {
@@ -18,9 +21,16 @@ describe('ConfigManager', () => {
     // 模拟home目录
     (os.homedir as jest.Mock).mockReturnValue(mockHomeDir);
 
+    // 模拟path.join
+    (path.join as jest.Mock).mockImplementation((...args: string[]) =>
+      args.join('/')
+    );
+    (path.dirname as jest.Mock).mockReturnValue('/mock/home/.code-insight');
+
     // 模拟文件系统
     (fs.ensureDirSync as jest.Mock).mockImplementation(() => {});
     (fs.existsSync as jest.Mock).mockReturnValue(false);
+    (fs.writeJsonSync as jest.Mock).mockImplementation(() => {});
 
     // 创建配置管理器实例
     configManager = new ConfigManager();
@@ -32,9 +42,7 @@ describe('ConfigManager', () => {
 
   describe('初始化', () => {
     it('应创建默认配置', () => {
-      expect(fs.ensureDirSync).toHaveBeenCalledWith(
-        path.dirname(mockConfigPath)
-      );
+      expect(fs.ensureDirSync).toHaveBeenCalledWith('/mock/home/.code-insight');
       expect(fs.existsSync).toHaveBeenCalledWith(mockConfigPath);
       expect(fs.writeJsonSync).toHaveBeenCalledWith(
         mockConfigPath,
@@ -52,6 +60,14 @@ describe('ConfigManager', () => {
 
     it('应加载现有配置', () => {
       jest.resetAllMocks();
+
+      // 模拟home目录
+      (os.homedir as jest.Mock).mockReturnValue(mockHomeDir);
+
+      // 模拟path.join
+      (path.join as jest.Mock).mockImplementation((...args: string[]) =>
+        args.join('/')
+      );
 
       const mockConfig = {
         permissions: { '/test/path': true },
@@ -115,6 +131,9 @@ describe('ConfigManager', () => {
     });
 
     it('应重置配置', () => {
+      // 重置fs.writeJsonSync计数
+      (fs.writeJsonSync as jest.Mock).mockClear();
+
       // 先设置一些自定义配置
       configManager.set('preferredMode', 'full');
       configManager.setLastUsedOptions(['coverage']);
@@ -126,7 +145,7 @@ describe('ConfigManager', () => {
       expect(configManager.get('preferredMode')).toEqual('single');
       expect(configManager.get('lastUsedOptions')).toEqual([]);
       expect(configManager.get('permissions')).toEqual({});
-      expect(fs.writeJsonSync).toHaveBeenCalledTimes(3); // 包括初始化、配置更改和重置
+      expect(fs.writeJsonSync).toHaveBeenCalledTimes(3); // 包括配置更改和重置
     });
   });
 

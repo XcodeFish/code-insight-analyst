@@ -30,10 +30,14 @@ export class PluginManager {
 
   /**
    * 构造函数
+   * @param pluginLoader 可选的插件加载器实例
+   * @param configManager 可选的配置管理器实例
    */
-  constructor() {
+  constructor(pluginLoader?: PluginLoader, configManager?: ConfigManager) {
     this.logger = new Logger();
-    this.configManager = new ConfigManager();
+
+    // 使用传入的实例或创建新实例
+    this.configManager = configManager || new ConfigManager();
 
     // 用户插件目录
     this.userPluginsDir = path.join(os.homedir(), '.code-insight', 'plugins');
@@ -41,8 +45,8 @@ export class PluginManager {
     // 系统插件目录（内置插件）
     this.systemPluginsDir = path.join(__dirname, '..', '..', 'plugins');
 
-    // 创建插件加载器
-    this.pluginLoader = new PluginLoader();
+    // 使用传入的插件加载器或创建新的
+    this.pluginLoader = pluginLoader || new PluginLoader();
   }
 
   /**
@@ -58,6 +62,10 @@ export class PluginManager {
 
       // 确保用户插件目录存在
       await fs.ensureDir(this.userPluginsDir);
+
+      // 加载插件配置
+      this.configManager.get('plugins');
+      this.logger.debug('已加载插件配置');
 
       // 加载系统插件
       if (fs.existsSync(this.systemPluginsDir)) {
@@ -432,5 +440,30 @@ export class PluginManager {
         },
       },
     };
+  }
+
+  /**
+   * 清理插件资源
+   */
+  public async cleanup(): Promise<void> {
+    if (!this.isInitialized) {
+      return;
+    }
+
+    this.logger.info('正在清理插件资源...');
+    const plugins = this.pluginLoader.getPlugins();
+
+    for (const plugin of plugins) {
+      try {
+        if (typeof plugin.cleanup === 'function') {
+          await plugin.cleanup();
+        }
+      } catch (error) {
+        this.logger.error(`插件 ${plugin.name} 清理失败:`, error);
+      }
+    }
+
+    this.isInitialized = false;
+    this.logger.info('插件资源清理完成');
   }
 }

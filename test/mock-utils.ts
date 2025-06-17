@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* global jest */
 /**
  * 测试辅助工具模块
  * 提供常用的模拟函数和工具方法
@@ -14,14 +16,12 @@ export function createMockFS() {
     existsSync: jest.fn().mockImplementation((path: string) => {
       return Boolean(files[path]) || Boolean(dirs[path]);
     }),
-    readFileSync: jest
-      .fn()
-      .mockImplementation((path: string, options?: any) => {
-        if (!files[path]) {
-          throw new Error(`File not found: ${path}`);
-        }
-        return files[path];
-      }),
+    readFileSync: jest.fn().mockImplementation((path: string) => {
+      if (!files[path]) {
+        throw new Error(`File not found: ${path}`);
+      }
+      return files[path];
+    }),
     writeFileSync: jest
       .fn()
       .mockImplementation((path: string, data: string | Buffer) => {
@@ -81,7 +81,7 @@ export function createMockFS() {
 
       return result;
     }),
-    mkdirSync: jest.fn().mockImplementation((path: string, options?: any) => {
+    mkdirSync: jest.fn().mockImplementation((path: string) => {
       dirs[path] = true;
       return true;
     }),

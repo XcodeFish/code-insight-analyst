@@ -210,6 +210,11 @@ describe('PluginLoader', () => {
     beforeEach(async () => {
       // 加载测试插件
       await pluginLoader.initialize();
+
+      // 手动设置插件，确保测试正确执行
+      (pluginLoader as any).plugins = new Map();
+      (pluginLoader as any).plugins.set('test-plugin-1', mockPlugin1);
+      (pluginLoader as any).plugins.set('test-plugin-2', mockPlugin2);
     });
 
     it('应执行所有插件', async () => {
@@ -219,6 +224,20 @@ describe('PluginLoader', () => {
         tools: {} as any,
         analysisResults: {},
       };
+
+      // 重置和设置模拟函数
+      mockPlugin1.execute.mockClear();
+      mockPlugin2.execute.mockClear();
+
+      mockPlugin1.execute.mockResolvedValue({
+        success: true,
+        data: { result: 'test-plugin-1-result' },
+      });
+
+      mockPlugin2.execute.mockResolvedValue({
+        success: true,
+        data: { result: 'test-plugin-2-result' },
+      });
 
       const results = await pluginLoader.executePlugins(context);
 

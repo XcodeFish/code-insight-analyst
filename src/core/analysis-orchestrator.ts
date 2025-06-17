@@ -5,7 +5,6 @@ import { FileSystemService } from './file-system-service';
 import { AstService } from './ast-service';
 import { CoverageAnalyzer } from '../analyzers/coverage-analyzer';
 import { ExampleIncrementalAnalyzer } from '../analyzers/example-incremental-analyzer';
-import path from 'path';
 
 // 分析结果接口
 export interface IAnalysisResult {
@@ -111,6 +110,7 @@ export class AnalysisOrchestrator {
 
     // 确保目标路径已设置，如果未设置，使用第一个文件的目录
     if (!this.targetPath) {
+      const path = require('path');
       this.targetPath = path.dirname(files[0]);
     }
 
@@ -171,38 +171,20 @@ export class AnalysisOrchestrator {
   /**
    * 获取分析器实例
    */
-  private getAnalyzer(type: string, targetPath: string): any {
-    switch (type) {
-      case 'coverage':
-        return new CoverageAnalyzer(targetPath, this.astService);
-
-      case 'method-dup':
-        // 将在后续迭代中实现
-        throw new Error('方法重复检测分析器尚未实现');
-
-      case 'unused-code':
-        // 将在后续迭代中实现
-        throw new Error('未使用代码检测分析器尚未实现');
-
-      case 'dependencies':
-        // 将在后续迭代中实现
-        throw new Error('依赖关系分析器尚未实现');
-
-      case 'memory-leak':
-        // 将在后续迭代中实现
-        throw new Error('内存泄漏检测分析器尚未实现');
-
-      case 'infinite-loop':
-        // 将在后续迭代中实现
-        throw new Error('死循环检测分析器尚未实现');
-
-      case 'example-incremental':
-        // 示例增量分析器
-        return new ExampleIncrementalAnalyzer(targetPath, this.astService);
-
-      default:
-        throw new Error(`未知的分析类型: ${type}`);
+  private getAnalyzer(type: string, projectPath: string): any {
+    // 这里根据type返回对应的分析器实例
+    // 实际项目中应该维护一个分析器注册表
+    if (type === 'ts-coverage') {
+      return new CoverageAnalyzer(projectPath, this.astService);
     }
+
+    if (type === 'duplicate-method') {
+      return new ExampleIncrementalAnalyzer(projectPath, this.astService);
+    }
+
+    // 添加更多分析器...
+
+    throw new Error(`未找到分析器: ${type}`);
   }
 
   /**
