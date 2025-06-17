@@ -4,9 +4,23 @@
   "description": "高性能、多功能的代码分析工具",
   "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "bin": {
     "code-insight": "bin/code-insight.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -14,7 +28,8 @@
     "format": "prettier --write .",
     "test": "jest --config=jest.config.js",
     "test:watch": "jest --watch --config=jest.config.js",
-    "test:coverage": "jest --coverage --config=jest.config.js"
+    "test:coverage": "jest --coverage --config=jest.config.js",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "keywords": [
     "code-analysis",
@@ -22,8 +37,19 @@
     "duplicate-code",
     "unused-code"
   ],
-  "author": "",
+  "author": "codefish",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XcodeFish/code-insight-analyst.git"
+  },
+  "bugs": {
+    "url": "https://github.com/XcodeFish/code-insight-analyst/issues"
+  },
+  "homepage": "https://github.com/XcodeFish/code-insight-analyst#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
