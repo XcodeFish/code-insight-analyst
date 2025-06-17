@@ -1,6 +1,6 @@
 {
   "name": "code-insight-analyst",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "高性能、多功能的代码分析工具",
   "type": "module",
   "main": "dist/index.js",
@@ -83,6 +83,7 @@
     "cli-table3": "^0.6.3",
     "commander": "^11.0.0",
     "console-table-printer": "^2.14.3",
+    "fs-extra": "^11.1.1",
     "glob": "^11.0.3",
     "inquirer": "^8.2.5",
     "listr2": "^6.6.0",
