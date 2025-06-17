@@ -7,6 +7,7 @@ import { Command } from 'commander';
 import { AnalyzeCommand } from './commands/analyze-command';
 import { DependencyCommand } from './commands/dependency-command';
 import { WatchCommand } from './commands/watch-command';
+import { InteractiveCommand } from './commands/interactive-command';
 import { version } from '../../package.json';
 
 /**
@@ -25,9 +26,15 @@ export function run(): void {
     const analyzeCommand = new AnalyzeCommand();
     const dependencyCommand = new DependencyCommand();
     const watchCommand = new WatchCommand();
+    const interactiveCommand = new InteractiveCommand();
 
     // 先检查命令是否存在
-    if (!analyzeCommand || !dependencyCommand || !watchCommand) {
+    if (
+      !analyzeCommand ||
+      !dependencyCommand ||
+      !watchCommand ||
+      !interactiveCommand
+    ) {
       console.error('命令对象初始化失败');
       process.exit(1);
     }
@@ -55,12 +62,14 @@ export function run(): void {
     analyzeCommand.register(program);
     dependencyCommand.register(program);
     watchCommand.register(program);
+    program.addCommand(interactiveCommand.getCommand());
 
     // 添加帮助信息
     program.addHelpText(
       'after',
       `
 示例:
+  $ code-insight                              # 启动交互式分析模式
   $ code-insight dependency                  # 分析当前项目的依赖关系
   $ code-insight dep -p ./my-project         # 分析指定项目的依赖关系
   $ code-insight dep -f html -o ./reports    # 生成HTML格式报告并保存到指定目录
@@ -68,8 +77,15 @@ export function run(): void {
     );
 
     // 设置默认行为
-    program.action(() => {
-      program.help();
+    program.action(async () => {
+      try {
+        await interactiveCommand.interactiveMode();
+      } catch (error) {
+        console.error(
+          `错误: ${error instanceof Error ? error.message : String(error)}`
+        );
+        process.exit(1);
+      }
     });
 
     program.parse();

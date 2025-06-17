@@ -5,6 +5,7 @@ import { PermissionPrompt } from './prompt/permission-prompt';
 import { DependencyCommand } from './commands/dependency-command';
 import { WatchCommand } from './commands/watch-command';
 import { AnalyzeCommand } from './commands/analyze-command';
+import { InteractiveCommand } from './commands/interactive-command';
 import { ErrorHandler } from '../utils/error-handler';
 
 /**
@@ -38,14 +39,26 @@ export class CliApp {
     // 注册命令
     this.registerCommands();
 
+    // 设置默认行为：当没有输入任何子命令时，运行交互式模式
+    this.program.action(async () => {
+      try {
+        const interactiveCommand = new InteractiveCommand();
+        await interactiveCommand.interactiveMode();
+      } catch (error) {
+        this.errorHandler.error(error instanceof Error ? error : String(error));
+        process.exit(1);
+      }
+    });
+
     // 添加帮助信息
     this.program.addHelpText(
       'after',
       `
 示例:
-  $ code-insight dependency                  # 分析当前项目的依赖关系
-  $ code-insight dep -p ./my-project         # 分析指定项目的依赖关系
-  $ code-insight dep -f html -o ./reports    # 生成HTML格式报告并保存到指定目录
+  $ code-insight                              # 启动交互式分析模式
+  $ code-insight dependency                   # 分析当前项目的依赖关系
+  $ code-insight dep -p ./my-project          # 分析指定项目的依赖关系
+  $ code-insight dep -f html -o ./reports     # 生成HTML格式报告并保存到指定目录
   `
     );
 
@@ -68,6 +81,10 @@ export class CliApp {
     // 注册分析命令
     const analyzeCommand = new AnalyzeCommand();
     analyzeCommand.register(this.program);
+
+    // 注册交互式命令
+    const interactiveCommand = new InteractiveCommand();
+    this.program.addCommand(interactiveCommand.getCommand());
   }
 
   /**

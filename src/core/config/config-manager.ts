@@ -115,6 +115,21 @@ export interface AnalysisConfig extends BaseConfig {
  */
 export class ConfigManager {
   /**
+   * 单例实例
+   */
+  private static instance: ConfigManager;
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): ConfigManager {
+    if (!ConfigManager.instance) {
+      ConfigManager.instance = new ConfigManager();
+    }
+    return ConfigManager.instance;
+  }
+
+  /**
    * 默认配置
    */
   private static readonly DEFAULT_CONFIG: AnalysisConfig = {
@@ -216,6 +231,73 @@ export class ConfigManager {
    */
   public getConfig(): AnalysisConfig {
     return { ...this.config };
+  }
+
+  /**
+   * 获取配置项
+   * @param key 配置键
+   */
+  public get(key: string): any {
+    const parts = key.split('.');
+    let result: any = this.config;
+
+    for (const part of parts) {
+      if (result === undefined || result === null) {
+        return undefined;
+      }
+      result = result[part];
+    }
+
+    return result;
+  }
+
+  /**
+   * 设置配置项
+   * @param key 配置键
+   * @param value 配置值
+   */
+  public set(key: string, value: any): void {
+    const parts = key.split('.');
+    const lastPart = parts.pop();
+
+    if (!lastPart) {
+      return;
+    }
+
+    let target: any = this.config;
+
+    for (const part of parts) {
+      if (target[part] === undefined || target[part] === null) {
+        target[part] = {};
+      }
+      target = target[part];
+    }
+
+    target[lastPart] = value;
+  }
+
+  /**
+   * 获取所有已保存的配置
+   */
+  public getConfigs(): Record<string, any> {
+    // 模拟一些预设配置
+    return {
+      default: {
+        description: '默认配置',
+        analyzers: ['dependencies', 'method-dup'],
+        outputFormat: 'console',
+      },
+      'full-analysis': {
+        description: '全面分析',
+        analyzers: ['dependencies', 'method-dup', 'unused-code', 'coverage'],
+        outputFormat: 'html',
+      },
+      performance: {
+        description: '性能分析',
+        analyzers: ['memory-leak', 'infinite-loop'],
+        outputFormat: 'json',
+      },
+    };
   }
 
   /**
