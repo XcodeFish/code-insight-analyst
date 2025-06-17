@@ -10,10 +10,9 @@ Code Insight Analyst 是一个专为开发团队设计的代码分析工具，�
 
 - **多维度分析**：提供代码复杂度、重复代码、依赖关系等多角度分析
 - **增量扫描**：支持仅分析变更的文件，提高分析效率
-- **插件系统**：通过插件机制灵活扩展分析功能
-- **命令行界面**：简单直观的命令行操作体验
-- **可视化报告**：生成清晰直观的分析报告
-- **持续集成**：易于集成到CI/CD流程中
+- **实时监控**：通过watch模式实时监控代码变更并进行分析
+- **交互式界面**：提供简洁的命令行交互体验
+- **依赖分析**：构建和可视化项目依赖关系图
 
 ## 安装
 
@@ -21,22 +20,56 @@ Code Insight Analyst 是一个专为开发团队设计的代码分析工具，�
 npm install -g code-insight-analyst
 ```
 
+或者使用pnpm:
+
+```bash
+pnpm add -g code-insight-analyst
+```
+
 ## 快速开始
 
 ### 基本用法
 
 ```bash
+# 启动交互式分析模式
+code-insight
+
 # 分析当前目录下的代码
 code-insight analyze
 
 # 分析指定目录
-code-insight analyze /path/to/project
-
-# 生成分析报告
-code-insight analyze --report
+code-insight analyze -p /path/to/project
 
 # 监控模式，检测文件变化并自动分析
 code-insight watch
+```
+
+### 依赖分析
+
+```bash
+# 分析当前项目的依赖关系
+code-insight dependency
+
+# 分析指定项目的依赖关系
+code-insight dep -p ./my-project
+
+# 生成HTML格式报告并保存到指定目录
+code-insight dep -f html -o ./reports
+```
+
+### 监控模式
+
+监控模式会持续监测项目文件的变更，并在检测到变化时自动运行分析：
+
+```bash
+# 监控当前目录
+code-insight watch
+
+# 监控指定目录，设置检测间隔
+code-insight watch -p ./my-project -i 3000
+
+# 无交互模式运行
+code-insight watch --no-prompt
 ```
 
 ### 配置文件
@@ -55,136 +88,65 @@ code-insight watch
       "threshold": 3
     }
   },
-  "plugins": {
-    "code-metrics-plugin": {
-      "enabled": true,
-      "options": {
-        "detailedReport": true
-      }
-    }
+  "watchMode": {
+    "enabled": true,
+    "interval": 5000,
+    "patterns": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    "exclude": ["**/node_modules/**", "**/dist/**"]
+  },
+  "dependency": {
+    "includeNpm": false,
+    "includeTypeImports": true,
+    "generateGraph": true
   }
 }
-```
-
-## 插件系统
-
-Code Insight Analyst 采用插件架构，可以轻松扩展其功能：
-
-### 使用插件
-
-```bash
-# 安装插件
-code-insight plugin install code-metrics-plugin
-
-# 列出已安装的插件
-code-insight plugin list
-
-# 启用/禁用插件
-code-insight plugin enable code-metrics-plugin
-code-insight plugin disable code-metrics-plugin
-```
-
-### 开发插件
-
-创建一个 Code Insight 插件非常简单：
-
-```typescript
-// my-custom-plugin/index.js
-module.exports = {
-  default: {
-    name: 'my-custom-plugin',
-    version: '1.0.0',
-    description: '自定义分析插件',
-    author: '你的名字',
-
-    async initialize() {
-      // 插件初始化逻辑
-    },
-
-    async execute(context) {
-      // 执行分析逻辑
-      return {
-        success: true,
-        data: {
-          // 分析结果
-        }
-      };
-    },
-
-    async cleanup() {
-      // 插件清理逻辑
-    }
-  }
-};
 ```
 
 ## 命令参考
 
 | 命令 | 描述 |
 |------|------|
+| `code-insight` | 启动交互式分析模式 |
 | `code-insight analyze [path]` | 分析指定路径的代码 |
 | `code-insight watch [path]` | 监控代码变更并自动分析 |
-| `code-insight report` | 生成分析报告 |
-| `code-insight plugin list` | 列出已安装的插件 |
-| `code-insight plugin install <name>` | 安装插件 |
-| `code-insight plugin uninstall <name>` | 卸载插件 |
-| `code-insight plugin enable <name>` | 启用插件 |
-| `code-insight plugin disable <name>` | 禁用插件 |
-| `code-insight config set <key> <value>` | 设置配置项 |
-| `code-insight config get <key>` | 获取配置项 |
+| `code-insight dependency/dep [dir]` | 分析项目依赖关系 |
 | `code-insight --help` | 显示帮助信息 |
 
-## 分析指标说明
+### analyze 命令选项
 
-- **复杂度分析**：包括圈复杂度、认知复杂度等度量
-- **代码重复分析**：识别重复代码块及其分布
-- **依赖分析**：构建模块间依赖关系图
-- **代码异味检测**：识别潜在的代码问题和优化机会
-- **变更影响分析**：评估代码变更的影响范围
+| 选项 | 描述 |
+|------|------|
+| `-p, --path <path>` | 要分析的代码路径 |
+| `-o, --output <o>` | 输出报告的路径 |
+| `--ignore <patterns...>` | 要忽略的文件模式 |
 
-## 集成到 CI/CD
+### watch 命令选项
 
-### GitHub Actions 示例
+| 选项 | 描述 |
+|------|------|
+| `-p, --path <path>` | 指定项目路径 |
+| `-i, --interval <ms>` | 监测间隔（毫秒） |
+| `--no-prompt` | 禁用交互式提示 |
+| `--analyzers <items>` | 指定要使用的分析器，逗号分隔 |
 
-```yaml
-name: Code Analysis
+### dependency 命令选项
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - run: npm install -g code-insight-analyst
-    - name: Run Code Analysis
-      run: code-insight analyze --report
-    - name: Upload Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: code-insight-report
-        path: .code-insight/reports/
-```
+| 选项 | 描述 |
+|------|------|
+| `-p, --project <dir>` | 指定项目路径 |
+| `-f, --format <format>` | 报告格式 (console, html, json) |
+| `-o, --output <dir>` | 报告输出目录 |
+| `-c, --circular` | 仅检测循环依赖 |
+| `-v, --verbose` | 显示详细信息 |
 
 ## 系统要求
 
-- Node.js 14.0.0 或更高版本
+- Node.js 16.0.0 或更高版本
 - npm 6.0.0 或更高版本
 
 ## 许可证
 
 MIT
-
-## 贡献指南
-
-欢迎贡献代码、报告问题或提出建议！请查看我们的[贡献指南](CONTRIBUTING.md)了解更多信息。
 
 ## 联系我们
 
