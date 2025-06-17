@@ -107,4 +107,12 @@ export class DependencyCommand {
   getCommand(): Command {
     return this.command;
   }
+
+  /**
+   * 注册命令到程序
+   * @param program Commander程序实例
+   */
+  public register(program: Command): void {
+    program.addCommand(this.command);
+  }
 }

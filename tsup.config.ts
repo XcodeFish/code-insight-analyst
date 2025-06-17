@@ -7,9 +7,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   target: 'es2018',
-  onSuccess: 'node scripts/generate-bin.js',
+  onSuccess: 'node scripts/generate-bin.mjs',
   treeshake: true,
-  banner: {
-    js: '#!/usr/bin/env node',
-  },
+  external: ['glob', 'commander', 'chalk', 'chokidar', 'lodash', 'micromatch'],
 });
