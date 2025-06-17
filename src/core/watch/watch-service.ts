@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 import chokidar from 'chokidar';
-import { debounce } from 'lodash';
+import lodash from 'lodash';
 import { Logger } from '../../utils/logger';
 import { ConfigManager } from '../../utils/config-manager';
 import { PluginManager } from '../../plugins/manager';
@@ -60,7 +60,7 @@ export class WatchService extends EventEmitter {
   private projectPath: string = '';
   private pendingChanges: Map<string, FileChangeInfo> = new Map();
   private isRunning: boolean = false;
-  private processChangesFn: (() => Promise<void>) & { cancel(): void };
+  private processChangesFn: ReturnType<typeof lodash.debounce>;
 
   /**
    * 构造函数
@@ -72,7 +72,10 @@ export class WatchService extends EventEmitter {
     this.pluginManager = new PluginManager();
 
     // 初始化防抖函数
-    this.processChangesFn = debounce(this.processChanges.bind(this), 5000);
+    this.processChangesFn = lodash.debounce(
+      this.processChanges.bind(this),
+      5000
+    );
 
     // 初始化时调整最大监听器数量，避免可能的内存泄漏警告
     this.setMaxListeners(50);
@@ -98,7 +101,7 @@ export class WatchService extends EventEmitter {
 
     // 更新防抖间隔
     this.processChangesFn.cancel();
-    this.processChangesFn = debounce(
+    this.processChangesFn = lodash.debounce(
       this.processChanges.bind(this),
       watchConfig.interval || 5000
     );
