@@ -77,6 +77,15 @@ export class CliApp {
     try {
       await this.program.parseAsync(process.argv);
     } catch (error) {
+      // 如果是帮助命令或版本命令，不输出错误
+      if (
+        error instanceof Error &&
+        (error.message === '(outputHelp)' ||
+          error.message === '(outputVersion)')
+      ) {
+        process.exit(0);
+      }
+
       this.errorHandler.error(error instanceof Error ? error : String(error));
       process.exit(1);
     }
