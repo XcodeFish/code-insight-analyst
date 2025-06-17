@@ -86,7 +86,7 @@ export class DependencyService {
     // 是否需要详细报告
     const detailed = true;
 
-    const reportPath = await reportGenerator.generate(
+    const reportPathOrContent = await reportGenerator.generate(
       analysisResult as unknown as Record<string, unknown>,
       {
         type: reportType,
@@ -96,8 +96,15 @@ export class DependencyService {
       }
     );
 
-    console.info(`分析完成，报告已生成: ${reportPath}`);
-    return reportPath;
+    // 如果是控制台报告，直接输出内容
+    if (reportType === ReportType.CONSOLE) {
+      console.log(reportPathOrContent);
+      console.info(`\n分析完成`);
+    } else {
+      console.info(`分析完成，报告已生成: ${reportPathOrContent}`);
+    }
+
+    return reportPathOrContent;
   }
 
   /**
