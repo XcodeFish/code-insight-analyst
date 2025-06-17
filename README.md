@@ -188,5 +188,5 @@ MIT
 
 ## 联系我们
 
-- GitHub 仓库：[https://github.com/yourusername/code-insight-analyst](https://github.com/yourusername/code-insight-analyst)
-- 问题追踪：[https://github.com/yourusername/code-insight-analyst/issues](https://github.com/yourusername/code-insight-analyst/issues)
+- GitHub 仓库：[https://github.com/XcodeFish/code-insight-analyst](https://github.com/XcodeFish/code-insight-analyst)
+- 问题追踪：[https://github.com/XcodeFish/code-insight-analyst/issues](https://github.com/XcodeFish/code-insight-analyst/issues)
