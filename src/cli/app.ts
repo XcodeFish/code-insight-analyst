@@ -3,6 +3,8 @@
 import { Command } from 'commander';
 import { PermissionPrompt } from './prompt/permission-prompt';
 import { DependencyCommand } from './commands/dependency-command';
+import { WatchCommand } from './commands/watch-command';
+import { AnalyzeCommand } from './commands/analyze-command';
 import { ErrorHandler } from '../utils/error-handler';
 
 /**
@@ -59,8 +61,13 @@ export class CliApp {
     const dependencyCommand = new DependencyCommand();
     this.program.addCommand(dependencyCommand.getCommand());
 
-    // 这里可以继续添加其他命令
-    // ...
+    // 注册监测命令
+    const watchCommand = new WatchCommand();
+    watchCommand.register(this.program);
+
+    // 注册分析命令
+    const analyzeCommand = new AnalyzeCommand();
+    analyzeCommand.register(this.program);
   }
 
   /**
