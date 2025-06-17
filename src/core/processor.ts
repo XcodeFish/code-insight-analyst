@@ -6,6 +6,11 @@ import * as os from 'os';
 import { Worker } from 'worker_threads';
 import * as path from 'path';
 import * as events from 'events';
+import { fileURLToPath } from 'url';
+
+// 获取 __dirname 替代方案
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * 任务类型

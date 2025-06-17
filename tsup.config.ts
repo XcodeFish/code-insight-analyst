@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  target: 'es2018',
+  target: 'es2020',
   onSuccess: 'node scripts/generate-bin.mjs',
   treeshake: true,
   external: [

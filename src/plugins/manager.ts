@@ -3,6 +3,11 @@ import os from 'os';
 import fs from 'fs-extra';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { fileURLToPath } from 'url';
+
+// 获取 __dirname 替代方案
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { Logger } from '../utils/logger';
 import { ConfigManager } from '../utils/config-manager';
 import { PluginLoader } from './loader';

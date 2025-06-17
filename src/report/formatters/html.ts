@@ -1,6 +1,11 @@
 import * as path from 'path';
 import { promises as fsPromises } from 'fs';
 import * as ejs from 'ejs';
+import { fileURLToPath } from 'url';
+
+// 获取 __dirname 替代方案
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import { BaseReportGenerator } from './base';
 import { IAnalysisResult } from '../../types/analysis';
